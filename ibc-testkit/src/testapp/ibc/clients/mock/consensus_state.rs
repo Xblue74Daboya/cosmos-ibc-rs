@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use ibc::core::client::context::consensus_state::ConsensusState;
 use ibc::core::client::types::error::ClientError;
 use ibc::core::commitment_types::commitment::CommitmentRoot;
@@ -13,15 +15,11 @@ pub const MOCK_CONSENSUS_STATE_TYPE_URL: &str = "/ibc.mock.ConsensusState";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MockConsensusState {
     pub header: MockHeader,
-    pub root: CommitmentRoot,
 }
 
 impl MockConsensusState {
     pub fn new(header: MockHeader) -> Self {
-        Self {
-            header,
-            root: CommitmentRoot::from(vec![0]),
-        }
+        Self { header }
     }
 
     pub fn timestamp(&self) -> Timestamp {
@@ -39,7 +37,6 @@ impl TryFrom<RawMockConsensusState> for MockConsensusState {
 
         Ok(Self {
             header: raw_header.try_into()?,
-            root: CommitmentRoot::from(vec![0]),
         })
     }
 }
@@ -86,8 +83,12 @@ impl From<MockConsensusState> for Any {
 }
 
 impl ConsensusState for MockConsensusState {
+    /// [`RawMockConsensusState`] doesn't have a [`CommitmentRoot`].
+    /// So we return a const root: `CommitmentRoot::from(vec![0])`.
+    /// [`OnceLock`] is used as, allocation (`vec![0]`) not allowed in constants.
     fn root(&self) -> &CommitmentRoot {
-        &self.root
+        static ONCE_CELL: OnceLock<CommitmentRoot> = OnceLock::new();
+        ONCE_CELL.get_or_init(|| CommitmentRoot::from(vec![0]))
     }
 
     fn timestamp(&self) -> Timestamp {
