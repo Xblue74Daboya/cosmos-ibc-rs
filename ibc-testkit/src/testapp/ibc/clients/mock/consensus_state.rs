@@ -13,15 +13,11 @@ pub const MOCK_CONSENSUS_STATE_TYPE_URL: &str = "/ibc.mock.ConsensusState";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MockConsensusState {
     pub header: MockHeader,
-    pub root: CommitmentRoot,
 }
 
 impl MockConsensusState {
     pub fn new(header: MockHeader) -> Self {
-        Self {
-            header,
-            root: CommitmentRoot::from(vec![0]),
-        }
+        Self { header }
     }
 
     pub fn timestamp(&self) -> Timestamp {
@@ -39,7 +35,6 @@ impl TryFrom<RawMockConsensusState> for MockConsensusState {
 
         Ok(Self {
             header: raw_header.try_into()?,
-            root: CommitmentRoot::from(vec![0]),
         })
     }
 }
@@ -87,7 +82,7 @@ impl From<MockConsensusState> for Any {
 
 impl ConsensusState for MockConsensusState {
     fn root(&self) -> &CommitmentRoot {
-        &self.root
+        todo!()
     }
 
     fn timestamp(&self) -> Timestamp {
