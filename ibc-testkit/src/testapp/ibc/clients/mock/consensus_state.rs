@@ -7,7 +7,10 @@ use ibc::primitives::proto::{Any, Protobuf};
 
 use crate::testapp::ibc::clients::mock::header::MockHeader;
 use crate::testapp::ibc::clients::mock::proto::ConsensusState as RawMockConsensusState;
+use crate::utils::LazyLock;
+
 pub const MOCK_CONSENSUS_STATE_TYPE_URL: &str = "/ibc.mock.ConsensusState";
+pub static MOCK_CONSENSUS_STATE_ROOT: LazyLock<CommitmentRoot> = LazyLock::new(|| vec![0].into());
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -82,7 +85,7 @@ impl From<MockConsensusState> for Any {
 
 impl ConsensusState for MockConsensusState {
     fn root(&self) -> &CommitmentRoot {
-        todo!()
+        &MOCK_CONSENSUS_STATE_ROOT
     }
 
     fn timestamp(&self) -> Timestamp {
