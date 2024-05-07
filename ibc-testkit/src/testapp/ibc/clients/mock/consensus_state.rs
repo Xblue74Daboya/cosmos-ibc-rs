@@ -7,20 +7,23 @@ use ibc::primitives::proto::{Any, Protobuf};
 
 use crate::testapp::ibc::clients::mock::header::MockHeader;
 use crate::testapp::ibc::clients::mock::proto::ConsensusState as RawMockConsensusState;
-use crate::utils::LazyLock;
 
 pub const MOCK_CONSENSUS_STATE_TYPE_URL: &str = "/ibc.mock.ConsensusState";
-pub static MOCK_CONSENSUS_STATE_ROOT: LazyLock<CommitmentRoot> = LazyLock::new(|| vec![0].into());
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MockConsensusState {
     pub header: MockHeader,
+    // Imitate a constant commitment root.
+    root: CommitmentRoot,
 }
 
 impl MockConsensusState {
     pub fn new(header: MockHeader) -> Self {
-        Self { header }
+        Self {
+            header,
+            root: vec![0].into(),
+        }
     }
 
     pub fn timestamp(&self) -> Timestamp {
@@ -36,9 +39,7 @@ impl TryFrom<RawMockConsensusState> for MockConsensusState {
     fn try_from(raw: RawMockConsensusState) -> Result<Self, Self::Error> {
         let raw_header = raw.header.ok_or(ClientError::MissingRawConsensusState)?;
 
-        Ok(Self {
-            header: raw_header.try_into()?,
-        })
+        Ok(Self::new(raw_header.try_into()?))
     }
 }
 
@@ -85,7 +86,7 @@ impl From<MockConsensusState> for Any {
 
 impl ConsensusState for MockConsensusState {
     fn root(&self) -> &CommitmentRoot {
-        &MOCK_CONSENSUS_STATE_ROOT
+        &self.root
     }
 
     fn timestamp(&self) -> Timestamp {
