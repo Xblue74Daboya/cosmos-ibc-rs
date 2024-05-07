@@ -21,13 +21,16 @@ pub fn year_2023() -> Timestamp {
 
 /// In-house `LazyLock` implementation.
 /// Because `std::sync::LazyLock` in not yet stabilized.
-pub struct LazyLock<T> {
+pub struct LazyLock<T, F = fn() -> T> {
     once: OnceLock<T>,
-    factory: fn() -> T,
+    factory: F,
 }
 
-impl<T> LazyLock<T> {
-    pub const fn new(factory: fn() -> T) -> Self {
+impl<T, F> LazyLock<T, F>
+where
+    F: Fn() -> T,
+{
+    pub const fn new(factory: F) -> Self {
         Self {
             once: OnceLock::new(),
             factory,
