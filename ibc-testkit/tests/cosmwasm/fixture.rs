@@ -1,4 +1,4 @@
-use std::time::Duration;
+use core::time::Duration;
 
 use cosmwasm_std::{from_json, Deps, DepsMut, Empty, Response, StdError, StdResult};
 use ibc::clients::tendermint::client_state::ClientState as TmClientState;

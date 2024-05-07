@@ -1,7 +1,7 @@
 pub mod fixture;
 pub mod helper;
 
-use std::time::Duration;
+use core::time::Duration;
 
 use cosmwasm_std::from_json;
 use cosmwasm_std::testing::{mock_dependencies, mock_env};
