@@ -1,6 +1,3 @@
-use core::ops::Deref;
-use std::sync::OnceLock;
-
 use ibc::primitives::Timestamp;
 use tendermint::Time;
 
@@ -17,36 +14,4 @@ pub fn year_2023() -> Timestamp {
     Time::from_unix_timestamp(1_672_531_200, 0)
         .expect("should be a valid time")
         .into()
-}
-
-/// In-house `LazyLock` implementation.
-/// Because `std::sync::LazyLock` in not yet stabilized.
-pub struct LazyLock<T, F = fn() -> T> {
-    once: OnceLock<T>,
-    factory: F,
-}
-
-impl<T, F> LazyLock<T, F>
-where
-    F: Fn() -> T,
-{
-    pub const fn new(factory: F) -> Self {
-        Self {
-            once: OnceLock::new(),
-            factory,
-        }
-    }
-
-    pub fn get(&self) -> &T {
-        self.once.get_or_init(|| (self.factory)())
-    }
-}
-
-/// Implement `Deref` for `LazyLock` to allow dereferencing.
-impl<T> Deref for LazyLock<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        self.get()
-    }
 }
